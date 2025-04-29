@@ -1,55 +1,64 @@
 <template>
 
-  <div class="flex items-center justify-center min-h-screen bg-gray-100">
-    <div class="w-full max-w-sm bg-white shadow-md rounded-lg p-8">
-      <h2 v-if="step === 1 " class="text-2xl font-semibold text-center text-red-600 mb-5">
-        Ro'yxatdan o'tish
-      </h2>
+  <div class="min-h-screen flex items-center justify-center bg-gray-100">
+    <div class="bg-white rounded-lg shadow-lg flex w-full max-w-5xl overflow-hidden">
+      <div class="w-full lg:w-1/2 p-8">
+        <h2 class="text-3xl font-bold text-gray-800 mb-6">
+          Create your Account
+        </h2>
 
-      <form v-if="step===1" @submit.prevent="handleSignup" class="flex flex-col space-y-4">
-        <input
-            v-model="form.fullName"
-            placeholder="To'liq ism"
-            required
-            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-600"/>
-        <input
-            v-model="form.userName"
-            placeholder="userName"
-            required
-            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-600"/>
-        <input
-            v-model="form.email"
-            placeholder="email"
-            required
-            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-600"/>
-        <input
-            v-model="form.password"
-            placeholder="password"
-            required
-            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-600"/>
-        <button class=" w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-md transition duration-300"
-                type="submit"
-        >Ro'yhatdan o'tish
-        </button>
-        <a href="/login" class="text-blue-600 hover:text-blue-700 text-center">Sign In</a>
-      </form>
 
-      <form v-if="step===2" @submit.prevent="handleVerifyEmail "
-            class="flex flex-col space-y-4">
-        <h2 class="text-2xl font-semibold text-center">Email tasdiqlash</h2>
-        <input
-            v-model="verificationCode"
-            placeholder="Tasdiqlash kodi"
-            required
-            class="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-1 focus:ring-blue-600"/>
-        <button class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-md transition duration-300"
-                type="submit">Tasdiqlash
-        </button>
-      </form>
-      <p class="justify-center text-center font-medium"
-         v-if="message" :class="{'text-green-600': step === 1, 'text-red-600': step === 2 &&
-         message.includes('notug')}">
-        {{ message }}</p>
+        <form @submit.prevent="handleSignup" class="space-y-4">
+          <div class="flex gap-4">
+            <input
+                type="text"
+                v-model="form.fullName"
+                placeholder="Full Name"
+                required
+                class="w-1/2 px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 outline-none"/>
+
+            <input
+                v-model="form.userName"
+                placeholder="Username"
+                required
+                class="w-1/2 px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 outline-none"/>
+          </div>
+          <input
+              v-model="form.email"
+              placeholder="Email"
+              required
+              class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 outline-none"/>
+          <input
+              v-model="form.password"
+              placeholder="Password"
+              required
+              class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-500 outline-none"/>
+
+          <button
+              class="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-md transition"
+              type="submit"
+          >Create an account
+          </button>
+
+          <div class="flex items-center gap-2">
+            <div class="flex-1 h-px bg-gray-300"></div>
+            <span class="text-gray-400 text-sm">or</span>
+            <div class="flex-1 h-px bg-gray-300"></div>
+          </div>
+
+          <p class="text-sm text-gray-500 text-center mt-4">
+            Already have an account?
+            <a href="/login"
+               class="text-blue-600 hover:underline">Login here
+            </a>
+          </p>
+
+        </form>
+      </div>
+      <div class="hidden md:flex w-1/2 bg-gray-50 items-center justify-center ">
+        <img src="../assets/image_2025-04-29_10-56-28.png" alt="Illustration" class="max-w-1xs h-auto">
+      </div>
+
     </div>
   </div>
 </template>
@@ -58,8 +67,8 @@
 
 import {ref} from "vue";
 import type {RegisterUser} from "../type/User.ts";
-import {AuthService} from "../AuthService.ts";
-import {useRouter} from "vue-router";
+import {AuthService} from "../service/AuthService.ts";
+import router from "../router";
 
 const form = ref<RegisterUser>({
   fullName: "",
@@ -67,36 +76,15 @@ const form = ref<RegisterUser>({
   userName: "",
   password: ""
 })
-const step = ref(1)
-const verificationCode = ref('')
 const message = ref('')
-const router = useRouter()
 
 const handleSignup = async () => {
   try {
     await AuthService.signup(form.value)
-    message.value = ` Xush kelibsiz .Emailizga tasdiqlash kodi junatildi ,tizimga kirish uchun iltimos tasdiqlang`
-    step.value = 2
-  } catch (e) {
-    console.error(e)
-    message.value = "Xatolik yuz berdi"
-  }
-}
-const handleVerifyEmail = async () => {
-  try {
-    await AuthService.verifyEmail(
-        {
-          code: verificationCode.value,
-        }
-    )
-    message.value = "Emailingiz muvaffaqiyatli tasdiqlandi"
-
-    form.value = {fullName: "", userName: "", email: "", password: ""}
-    verificationCode.value = ""
     await router.push({name: "Home"})
   } catch (e) {
     console.error(e)
-    message.value = "Kod notug'ri kiritilgan"
+    message.value = "Xatolik yuz berdi"
   }
 }
 </script>
