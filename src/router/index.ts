@@ -1,23 +1,44 @@
-import {createRouter, createWebHistory} from 'vue-router'
+import {
+    createRouter,
+    createWebHistory,
+} from 'vue-router'
+import type {RouteRecordRaw} from 'vue-router'
+import MainLayout from "../layouts/Layout.vue"
 import Login from "../components/Login.vue";
 import SignUp from "../components/SignUp.vue";
 import HomeViews from "../views/HomeViews.vue";
-import Auth from "../components/Auth.vue";
+import NotFound from "../components/NotFound.vue";
+import AboutViews from "../views/AboutViews.vue";
+import ContactViews from "../views/ContactViews.vue";
 
 
-const routes = [
-    {
-        path: "/auth",
-        name: "Auth",
-        component: Auth
-    },
+const routes: Array<RouteRecordRaw> = [
     {
         path: '/',
         name: 'Home',
-        component: HomeViews,
-        meta: {
-            requiresAuth: true
-        }
+        redirect: "/dashboard",
+        component: MainLayout,
+        meta: {requiresAuth: true},
+        children: [
+            {
+                path: "/dashboard",
+                name: "HomeViews",
+                component: HomeViews,
+                meta: {requiresAuth: true},
+            },
+            {
+                path: "/about",
+                name: "AboutView",
+                component: AboutViews,
+                meta: {requiresAuth: true},
+            },
+            {
+                path: "/contact",
+                name: "Contact",
+                component: ContactViews,
+                meta: {requiresAuth: true},
+            }
+        ]
     },
     {
         path: '/login',
@@ -28,7 +49,11 @@ const routes = [
         path: '/signup',
         name: 'Signup',
         component: SignUp
-    },
+    }, {
+        path: '/:pathMatch(.*)*',
+        name: 'NotFound',
+        component: NotFound
+    }
 ]
 
 const router = createRouter({
